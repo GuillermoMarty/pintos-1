@@ -39,10 +39,12 @@ void check_sleeping_threads(void);
 void
 timer_init (void) 
 {
-  //initialize our sleeping threads list
-  list_init (&slp_threads);
   pit_configure_channel (0, 2, TIMER_FREQ);
   intr_register_ext (0x20, timer_interrupt, "8254 Timer");
+  printf("init list");
+  /*initialize our sleeping threads list
+    has to be done after the first timer intr is called */
+  list_init (&slp_threads);
 }
 
 /* Calibrates loops_per_tick, used to implement brief delays. */
@@ -95,15 +97,19 @@ timer_elapsed (int64_t then)
 void
 timer_sleep (int64_t ticks) 
 {
+  //makes sure that interrupts are enabled
+  ASSERT (intr_get_level () == INTR_ON);
   int64_t start = timer_ticks ();
   // assign ticks_to_sleep
+  printf("in timer_sleep()\n");
   thread_current () -> ticks_to_sleep = ticks;
   struct thread *this_thread = thread_current ();
   //insert the thread onto our sleep list
   list_push_front(&slp_threads,
-		  &this_thread -> elem);
-  //makes sure that interrupts are enabled
-  ASSERT (intr_get_level () == INTR_ON);
+		 &this_thread -> elem);
+  printf("adding to list: ");
+  size_t i = list_size(&slp_threads);
+  printf("%d\n",i);
   //disable interrupts
   enum intr_level old_level = intr_disable();
   thread_block ();
@@ -187,7 +193,7 @@ timer_interrupt (struct intr_frame *args UNUSED)
 {
   ticks++;
   thread_tick ();
-  
+  printf("In timer_interupt() func\n");
   //move any threads who have slept for long enough onto the ready queue
   // i.e. if timer_elapsed (start) < ticks
   check_sleeping_threads ();
@@ -266,36 +272,82 @@ real_time_delay (int64_t num, int32_t denom)
 
 void
 check_sleeping_threads (void){
-  /*struct list_elem *e;
-
+/*
+  printf("begin for\n");
+  struct list_elem *e;
   for (e = list_begin (&slp_threads); e != list_end (&slp_threads);
            e = list_next (e))
         {
           struct thread *t = list_entry (e, struct thread, allelem);
-	  if(t -> status == THREAD_BLOCKED){
+	  // if timer_sleep is passed zero
+          if(t -> status == THREAD_BLOCKED
+	     && t -> ticks_to_sleep == 0){
+            list_remove(e);
+	    printf("removed item\n");
+	    int i = list_size(e);
+	    printf("%d\n",i);
+            thread_unblock(t);  
+          }
+	  else if(t -> status == THREAD_BLOCKED){
 	    if(t -> ticks_to_sleep > 0){
+              printf("decrement\n");
 	      t -> ticks_to_sleep--;
+	      int n = t -> ticks_to_sleep;
+              printf("ticks_to_sleep (decremented):%d",n); 
 	      if(t -> ticks_to_sleep == 0){
 		list_remove (e);
+                printf("removed item\n");
+	        int i = list_size(e);
+	        printf("%d\n",i);
 		thread_unblock (t);
               }	
 	    }
 	  }
         }
-	*/
+  printf("end for\n");
+*/
+
   struct list_elem *e;
   struct thread *cur;
-  while(!list_empty(&slp_threads)){
+
+  if(!list_empty(&slp_threads)){
     e = list_front(&slp_threads);
-    cur = list_entry(e, struct thread, elem);
-    if(cur -> status == THREAD_BLOCKED){
-      if(cur -> ticks_to_sleep > 0){
-        cur -> ticks_to_sleep--;
-	if(cur -> ticks_to_sleep == 0){
-	  list_remove(e);
-          thread_unblock(cur);
-	}
-       }
-    }
+
+	  while(e != list_end(&slp_threads)){
+	    printf("begin while\n");
+	    cur = list_entry(e, struct thread, elem);
+	    if(cur -> status == THREAD_BLOCKED){
+	      if(cur -> ticks_to_sleep > 0){
+		cur -> ticks_to_sleep--;
+		int n = cur ->ticks_to_sleep;
+		printf("ticks_to_sleep (decremented):%d",n);
+
+		if(cur -> ticks_to_sleep == 0){
+		  list_remove(e);
+		  printf("removed item\n");
+		  int i = list_size(e);
+		  printf("%d\n",i);
+		  thread_unblock(cur);
+		}
+	       }
+	    }
+	    // if timer_sleep is passed zero
+	    else if(cur -> status == THREAD_BLOCKED
+		    && cur -> ticks_to_sleep <= 0){
+	      list_remove(e);
+	      printf("removed item\n");
+	      int i = list_size(e);
+	      printf("%d\n",i);
+	      thread_unblock(cur);  
+	    }
+	    if(list_empty(&slp_threads)){
+	      break;
+	    }
+	    else if(!list_empty(&slp_threads)) {
+	      e = list_next(e);
+	    }
+	  }
+	  printf("end while\n");
   }
 }
+
