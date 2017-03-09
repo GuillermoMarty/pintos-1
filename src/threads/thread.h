@@ -83,6 +83,7 @@ typedef int tid_t;
 struct thread
   {
     /* Owned by thread.c. */
+    int ticks_to_sleep;			/* Number of ticks to sleep this thread*/
     tid_t tid;                          /* Thread identifier. */
     enum thread_status status;          /* Thread state. */
     char name[16];                      /* Name (for debugging purposes). */
@@ -137,5 +138,4 @@ int thread_get_nice (void);
 void thread_set_nice (int);
 int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
-
 #endif /* threads/thread.h */

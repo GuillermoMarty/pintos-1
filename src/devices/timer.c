@@ -17,6 +17,12 @@
 #error TIMER_FREQ <= 1000 recommended
 #endif
 
+// holds sleeping threads
+struct list slp_threads;
+
+// index of next open slot in sleeping_threads array
+int sleeping_index = 0;
+
 /* Number of timer ticks since OS booted. */
 static int64_t ticks;
 
@@ -29,12 +35,15 @@ static bool too_many_loops (unsigned loops);
 static void busy_wait (int64_t loops);
 static void real_time_sleep (int64_t num, int32_t denom);
 static void real_time_delay (int64_t num, int32_t denom);
+void check_sleeping_threads(void);
 
 /* Sets up the timer to interrupt TIMER_FREQ times per second,
    and registers the corresponding interrupt. */
 void
 timer_init (void) 
 {
+  //initialize our sleeping threads list
+  list_init (&slp_threads);
   pit_configure_channel (0, 2, TIMER_FREQ);
   intr_register_ext (0x20, timer_interrupt, "8254 Timer");
 }
@@ -90,10 +99,19 @@ void
 timer_sleep (int64_t ticks) 
 {
   int64_t start = timer_ticks ();
-
+  // assign ticks_asleep
+  thread_current () -> ticks_to_sleep = ticks;
+  struct thread *this_thread = thread_current ();
+  //insert the thread onto our sleep list
+  list_push_front(&slp_threads,
+		      &this_thread -> elem);
+  //makes sure that interrupts are enabled
   ASSERT (intr_get_level () == INTR_ON);
-  while (timer_elapsed (start) < ticks) 
-    thread_yield ();
+  //disable interrupts
+  enum intr_level old_level = intr_disable();
+  thread_block ();
+  //enum intr_level old_level = intr_enable();
+  intr_set_level(old_level);
 }
 
 /* Sleeps for approximately MS milliseconds.  Interrupts must be
@@ -172,6 +190,10 @@ timer_interrupt (struct intr_frame *args UNUSED)
 {
   ticks++;
   thread_tick ();
+  
+  //move any threads who have slept for long enough onto the ready queue
+  // i.e. if timer_elapsed (start) < ticks
+  check_sleeping_threads ();
 }
 
 /* Returns true if LOOPS iterations waits for more than one timer
@@ -243,4 +265,40 @@ real_time_delay (int64_t num, int32_t denom)
      the possibility of overflow. */
   ASSERT (denom % 1000 == 0);
   busy_wait (loops_per_tick * num / 1000 * TIMER_FREQ / (denom / 1000)); 
+}
+
+void
+check_sleeping_threads (void){
+  /*struct list_elem *e;
+
+  for (e = list_begin (&slp_threads); e != list_end (&slp_threads);
+           e = list_next (e))
+        {
+          struct thread *t = list_entry (e, struct thread, allelem);
+	  if(t -> status == THREAD_BLOCKED){
+	    if(t -> ticks_to_sleep > 0){
+	      t -> ticks_to_sleep--;
+	      if(t -> ticks_to_sleep == 0){
+		list_remove (e);
+		thread_unblock (t);
+              }	
+	    }
+	  }
+        }
+	*/
+  struct list_elem *e;
+  struct thread *cur;
+  while(!list_empty(&slp_threads)){
+    e = list_front(&slp_threads);
+    cur = list_entry(e, struct thread, elem);
+    if(cur -> status == THREAD_BLOCKED){
+      if(cur -> ticks_to_sleep > 0){
+        cur -> ticks_to_sleep--;
+	if(cur -> ticks_to_sleep == 0){
+	  list_remove(e);
+          thread_unblock(cur);
+	}
+       }
+    }
+  }
 }
