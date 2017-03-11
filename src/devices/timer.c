@@ -94,6 +94,12 @@ timer_sleep (int64_t ticks)
 {
 	struct thread *current_thread;
 	enum intr_level current_level;
+
+  if(ticks <= 0)
+  {
+    return;
+  }
+  
 	ASSERT (intr_get_level() == INTR_ON);
 	current_level = intr_disable();
 	current_thread = thread_current();
