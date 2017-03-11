@@ -355,7 +355,7 @@ thread_set_priority (int new_priority)
         - new priority needs to be compared to the priority that the thread is donating
           i.e if NEWPRI < DONATEDPRI then only set OLD PRI
   */
-  if( cur -> is_donated){
+  else if( cur -> is_donated){
     if( new_priority < cur -> priority ){
       cur -> old_pri = new_priority;
     }
@@ -364,17 +364,31 @@ thread_set_priority (int new_priority)
      Case 3. current thread has been donated and will be donated again
         - old priority does not need change
   */
-  if(){
+  else if(true){
    //unsure so far
+   printf("hmm");
   }
+
+  // Check that the current thread still holds the highest priority.
+  thread_foreach(check_thread_pri(),NULL);
+
   /*
      RETURNS:
-
         - current threads priority
           (if current thread has donated priorties, return the highest donated priority)
   */
   return cur -> priority;
 }
+
+/* Takes the current thread and checks if the priority is the highest */
+void
+check_thread_pri (struct thread *t, void *aux)
+{
+  struct thread *cur = thread_current ();
+  
+  if( t -> priority > cur -> priority ){
+    thread_yield();
+  }
 
 /* Returns the current thread's priority. */
 int
