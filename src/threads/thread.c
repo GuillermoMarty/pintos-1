@@ -333,7 +333,7 @@ thread_foreach (thread_action_func *func, void *aux)
 
 /* Sets the current thread's priority to NEW_PRIORITY. */
 void
-thread_set_priority (int new_priority) 
+thread_set_priority (int new_priority, bool donated) 
 {
 
   // Old case
@@ -342,31 +342,40 @@ thread_set_priority (int new_priority)
   // Grab current thread
   struct thread *cur = current_thread ();
 
-  /* 
+
+  if(!donated)
+  {
+      /* 
      Case 1. current thread not donated
         - both old priority and new priority need to be set
   */
-  if( cur -> is_donated != true ){
-    cur -> old_pri = priority;
-    cur -> priority = new_priority;
-  }
-  /*
+    if( cur -> is_donated != true ){
+      cur -> priority = old_pri;
+      cur -> old_pri = new_priority;
+    }
+    /*
      Case 2. current thread has been donated
         - new priority needs to be compared to the priority that the thread is donating
           i.e if NEWPRI < DONATEDPRI then only set OLD PRI
-  */
-  else if( cur -> is_donated){
-    if( new_priority < cur -> priority ){
-      cur -> old_pri = new_priority;
+    */
+    else if( cur -> is_donated){
+      if( new_priority < cur -> priority ){
+        cur -> old_pri = new_priority;
+      }
+      else{
+        cur-> priority = cur -> old_pri;
+        cur -> old_pri = new_priority;
+      }
     }
   }
+
   /*
      Case 3. current thread has been donated and will be donated again
         - old priority does not need change
   */
-  else if(true){
-   //unsure so far
-   printf("hmm");
+  else{
+    cur->priority = new_priority;
+    cur->is_donated = true;
   }
 
   // Check that the current thread still holds the highest priority.
