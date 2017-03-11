@@ -189,7 +189,7 @@ timer_interrupt (struct intr_frame *args UNUSED)
     ticks++;
     thread_tick();
 
-    while (!list_empty(&sleeping_threads)) 
+    while (head_of_list != list_end(&sleeping_threads)) 
     {
       head_of_list = list_begin(&sleeping_threads);
       int64_t head_ticks = list_entry(head_of_list, struct thread, elem)->tick_to_wake_up;
