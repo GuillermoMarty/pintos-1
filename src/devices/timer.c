@@ -190,7 +190,7 @@ timer_interrupt (struct intr_frame *args UNUSED)
     thread_tick();
 
     head_of_list = list_begin(&sleeping_threads);
-    
+
     while (head_of_list != list_end(&sleeping_threads)) 
     {
       int64_t head_ticks = list_entry(head_of_list, struct thread, elem)->tick_to_wake_up;
@@ -202,6 +202,7 @@ timer_interrupt (struct intr_frame *args UNUSED)
       list_remove(head_of_list);
       thread_unblock(head_thread);
 	    head_of_list = list_begin(&sleeping_threads);
+      printf("%s and size %s\n", head_of_list, list_size(&sleeping_threads));
     }
 }
 
