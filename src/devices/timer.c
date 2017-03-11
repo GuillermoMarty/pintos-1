@@ -99,7 +99,7 @@ timer_sleep (int64_t ticks)
   {
     return;
   }
-  
+
 	ASSERT (intr_get_level() == INTR_ON);
 	current_level = intr_disable();
 	current_thread = thread_current();
@@ -185,16 +185,21 @@ timer_interrupt (struct intr_frame *args UNUSED)
 {
     struct list_elem *head_of_list;
     struct thread *head_thread;
+
     ticks++;
     thread_tick();
-    while (!list_empty(&sleeping_threads)) {
-        head_of_list = list_front(&sleeping_threads);
-	head_thread = list_entry(head_of_list, struct thread, elem);
-	if(head_thread->tick_to_wake_up > ticks) {
-	    break;
-	}
-	list_remove(head_of_list);
-	thread_unblock(head_thread);
+
+    while (!list_empty(&sleeping_threads)) 
+    {
+      head_of_list = list_begin(&sleeping_threads);
+      int64_t head_ticks = list_entry(head_of_list, struct thread, elem)->tick_to_wake_up;
+      head_thread = list_entry(head_of_list, struct thread, elem);
+	    if(head_ticks > ticks) {
+	      break;
+	    }
+      list_remove(head_of_list);
+      thread_unblock(head_thread);
+	    head_of_list = list_begin(&sleeping_threads);
     }
 }
 
