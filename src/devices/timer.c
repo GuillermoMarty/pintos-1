@@ -202,7 +202,7 @@ timer_interrupt (struct intr_frame *args UNUSED)
       list_remove(head_of_list);
       thread_unblock(head_thread);
 	    head_of_list = list_begin(&sleeping_threads);
-      printf("%s and size %s\n", head_of_list, list_size(&sleeping_threads));
+      printf("%s and size %d\n", head_of_list, list_size(&sleeping_threads));
     }
 }
 
