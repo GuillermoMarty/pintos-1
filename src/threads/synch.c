@@ -33,7 +33,7 @@
 #include "threads/thread.h"
 
 //delare
-void cmp_elem(struct list_elem *, struct list_elem *, void *); 
+struct list_elem * cmp_elem(struct list_elem *, struct list_elem *, void *); 
 
 /* Initializes semaphore SEMA to VALUE.  A semaphore is a
    nonnegative integer along with two atomic operators for
@@ -323,7 +323,7 @@ cond_signal (struct condition *cond, struct lock *lock UNUSED)
 
   if (!list_empty (&cond->waiters))
     // sema up max elem from waiters list
-    sema_up (&list_entry (list_max (&cond->waiters, cmp_elem, PRI_MIN),
+    sema_up (&list_entry (list_max (&cond->waiters, cmp_elem, NULL),
                           struct semaphore_elem, elem)->semaphore);
 }
 
@@ -343,8 +343,16 @@ cond_broadcast (struct condition *cond, struct lock *lock)
     cond_signal (cond, lock);
 }
 
-void
+struct list_elem *
 cmp_elem(struct list_elem *max, struct list_elem *e, void *aux)
 {
+  struct thread *max_thread = list_entry (max, struct thread, elem);
+  struct thread *e_thread = list_entry(e, struct thread, elem);
 
+  if( max_thread -> priority > e_thread -> priority){
+    return max;
+  }
+  else {
+    return e;
+  }  
 }
