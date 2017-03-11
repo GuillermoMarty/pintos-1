@@ -469,40 +469,6 @@ init_thread (struct thread *t, const char *name, int priority)
   intr_set_level (old_level);
 }
 
-void
-thread_wakeup (void)
-{
-  /* check threads in sleep queue by their sleep_ticks 
-   * if current sleep_ticks <= timer_ticks(), which is current ticks
-   * unblock it and remove it from sleep queue
-   * do these till found a thread whose sleep_ticks > timer_ticks()
-   */
-  struct list_elem *elem_cur; // Current element in the list
-  struct list_elem *elem_next; // Next element connected to the current one
-  struct thread *t;
-  enum intr_level old_level;
-
-  if (list_empty (&sleep_list))
-    return;
-
-  elem_cur = list_begin (&sleep_list);
-  while (elem_cur != list_end (&sleep_list))
-    {
-      elem_next = list_next (elem_cur);
-      t = list_entry (elem_cur, struct thread, elem);
-      if (t->sleep_ticks > timer_ticks())
-        break;
-
-      /* Remove the thread from sleep queue and unblock it */
-      old_level = intr_disable ();
-      list_remove (elem_cur);
-      thread_unblock (t);
-      intr_set_level (old_level);
-
-      elem_cur = elem_next;
-    }
-}
-
 /* Allocates a SIZE-byte frame at the top of thread T's stack and
    returns a pointer to the frame's base. */
 static void *
