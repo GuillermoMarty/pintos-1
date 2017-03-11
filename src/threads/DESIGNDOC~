@@ -34,32 +34,17 @@ Ben Connell <bconnel4@msudenver.edu>
 
    We first ensure that interrupts are turned on.  We then 
    temporarily disable them to calculate the number of ticks,
-   that we will wait before waking a sleeping thread.  The thread
+   that we will wait before waiking a sleeping thread.  The thread
    then gets added to the list of sleeping threads, using its time to
    sleep to determine its position in the list.  The thread is then 
-   blocked and the interrupt level is set.  The interrupt handler then 
-   checks the list of sleeping threads.  While there are threads in the
-   list, the handler looks at the thread at the front of the list.  If 
-   the timer ticks needed for sleeping thread is greater than the current
-   number of ticks.  It is done.  If not the thread at the front of the 
-   list is awoken.  This happens until the list of sleeping threads is
-   empty.
- 
+   blocked and the interrupt level is set. 
 >> A3: What steps are taken to minimize the amount of time spent in
 >> the timer interrupt handler?
-   
-   The list of sleeping threads is an ordered list with the number 
-   of ticks that it will take before a sleeping thread is awoken.
-   This means that we do not have to check every element in the list
-   to determine which thread if any is awoken. 
-	
+
 ---- SYNCHRONIZATION ----
 
 >> A4: How are race conditions avoided when multiple threads call
 >> timer_sleep() simultaneously?
-   
-   Race conditions are avoided by temporarily disabling interrupts. And 
-   then using then calculating when each thread should be awoken.
 
 >> A5: How are race conditions avoided when a timer interrupt occurs
 >> during a call to timer_sleep()?
@@ -68,14 +53,6 @@ Ben Connell <bconnel4@msudenver.edu>
 
 >> A6: Why did you choose this design?  In what ways is it superior to
 >> another design you considered?
-
-   Initially we considered placing the sleeping threads into a list that  
-   was not sorted by the ticks to wake up.  This would have been costly
-   in terms of time because in order to wake a sleeping thread, we could
-   have potentially had to walk through the entire list of sleeping threads
-   to see which one needed to be woken up.  With the current implementation 
-   the first thread in the list is the one that needs to wake up which is 
-   preferred over the initial design consideration.
 
 			 PRIORITY SCHEDULING
 			 ===================
