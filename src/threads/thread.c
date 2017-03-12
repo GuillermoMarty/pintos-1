@@ -322,12 +322,12 @@ thread_yield_current(struct thread *current)
   ASSERT (!intr_context ());
 
   old_level = intr_disable ();
-  if (cur != idle_thread) {
+  if (current != idle_thread) {
     /* Order ready list
      * Get thread with highest priority to run first */
-    list_insert_ordered(&ready_list, &cur->elem, (list_less_func *) &cmp_elem, NULL);
+    list_insert_ordered(&ready_list, &current->elem, (list_less_func *) &cmp_elem, NULL);
   }
-  cur->status = THREAD_READY;
+  current->status = THREAD_READY;
   schedule ();
   intr_set_level (old_level);
 }
