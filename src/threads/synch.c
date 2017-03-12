@@ -34,11 +34,11 @@
 
 //delare
 struct list_elem * cmp_elem(struct list_elem *, struct list_elem *, void *); 
-bool compare_thread_priority(struct list_elem * a, struct list_elem b);
+bool compare_thread_priority(struct list_elem * a, struct list_elem *b);
 
 
 /* Compare two threads priority  */
-bool compare_thread_priority(struct list_elem * a, struct list_elem b);
+bool compare_thread_priority(struct list_elem * a, struct list_elem * b)
 {
   ASSERT(a != NULL);
   ASSERT(b != NULL);
