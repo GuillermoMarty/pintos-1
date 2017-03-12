@@ -92,6 +92,8 @@ struct thread
     struct list_elem allelem;           /* List element for all threads list. */
     bool is_donated;		  	            /* Is the priority donated? */
     int old_pri;			                  /* The previous priority */
+    struct list donor_list;             /* Donor list   */
+    struct list donor_elem;             /* Donor list_elem  */
 
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */

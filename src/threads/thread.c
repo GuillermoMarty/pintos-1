@@ -314,6 +314,25 @@ thread_yield (void)
   intr_set_level (old_level);
 }
 
+void 
+thread_yield_current(struct thread *current)
+{
+  enum intr_level old_level;
+
+  ASSERT (!intr_context ());
+
+  old_level = intr_disable ();
+  if (cur != idle_thread) {
+    /* Change the ready_list to be ordered
+     * Get thread with highest priority to run first
+     */
+    list_insert_ordered(&ready_list, &cur->elem, priority_more, NULL);
+  }
+  cur->status = THREAD_READY;
+  schedule ();
+  intr_set_level (old_level);
+}
+
 /* Invoke function 'func' on all threads, passing along 'aux'.
    This function must be called with interrupts off. */
 void
