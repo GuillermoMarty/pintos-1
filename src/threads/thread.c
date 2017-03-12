@@ -332,6 +332,17 @@ thread_yield_current(struct thread *current)
   intr_set_level (old_level);
 }
 
+bool compare_thread_priority(struct list_elem * a, struct list_elem b);
+{
+  ASSERT(a != NULL);
+  ASSERT(b != NULL);
+
+  struct thread * a_thread = list_entry(a, struct thread, elem);
+  struct thread * b_thread = list_entry(b, struct thread, elem);
+
+  return a_thread->priority > b_thread->priority;
+}
+
 /* Invoke function 'func' on all threads, passing along 'aux'.
    This function must be called with interrupts off. */
 void
