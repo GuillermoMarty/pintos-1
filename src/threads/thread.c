@@ -332,7 +332,7 @@ thread_foreach (thread_action_func *func, void *aux)
 }
 
 /* Sets the current thread's priority to NEW_PRIORITY. */
-int
+void
 thread_set_priority (int new_priority) 
 {
 
@@ -343,6 +343,8 @@ thread_set_priority (int new_priority)
   struct thread *cur = thread_current ();
   // grab thread donation status
   bool donated = cur -> is_donated;
+  //current intrrupt level
+  enum intr_level old_level;
 
   if(!donated)
   {
@@ -380,14 +382,9 @@ thread_set_priority (int new_priority)
   }
 
   // Check that the current thread still holds the highest priority.
+  old_level = intr_disable ();
   thread_foreach(check_thread_pri,NULL);
-
-  /*
-     RETURNS:
-        - current threads priority
-          (if current thread has donated priorties, return the highest donated priority)
-  */
-  return cur -> priority;
+  intr_set_level (old_level);
 }
 
 /* Takes the current thread and checks if the priority is the highest */
@@ -645,3 +642,9 @@ allocate_tid (void)
 /* Offset of `stack' member within `struct thread'.
    Used by switch.S, which can't figure it out on its own. */
 uint32_t thread_stack_ofs = offsetof (struct thread, stack);
+
+bool compare_wake_ticks(struct list_elem *first, struct list_elem *second, void *aux) {
+   struct thread *firstThread = list_entry(first, struct thread, elem);
+   struct thread *secondThread = list_entry(second, struct thread, elem);
+   return firstThread->tick_to_wake_up < secondThread -> tick_to_wake_up;
+}

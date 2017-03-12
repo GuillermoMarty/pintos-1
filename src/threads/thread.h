@@ -83,7 +83,7 @@ typedef int tid_t;
 struct thread
   {
     /* Owned by thread.c. */
-    int ticks_to_sleep;			/* Number of ticks to sleep this thread*/
+    int64_t tick_to_wake_up;    			  /* Number of ticks to sleep this thread*/
     tid_t tid;                          /* Thread identifier. */
     enum thread_status status;          /* Thread state. */
     char name[16];                      /* Name (for debugging purposes). */
@@ -134,11 +134,12 @@ typedef void thread_action_func (struct thread *t, void *aux);
 void thread_foreach (thread_action_func *, void *);
 
 int thread_get_priority (void);
-int thread_set_priority (int new_priority);
+void thread_set_priority (int new_priority);
 void check_thread_pri(struct thread *t, void *aux);
 
 int thread_get_nice (void);
 void thread_set_nice (int);
 int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
+bool compare_wake_ticks(struct list_elem *first, struct list_elem *second, void *aux);
 #endif /* threads/thread.h */
