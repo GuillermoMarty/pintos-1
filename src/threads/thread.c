@@ -334,7 +334,7 @@ thread_yield_current(struct thread *current)
 }
 
 static bool 
-compare_thread_priority(struct list_elem * a, struct list_elem b);
+compare_thread_priority(struct list_elem * a, struct list_elem b)
 {
   ASSERT(a != NULL);
   ASSERT(b != NULL);
