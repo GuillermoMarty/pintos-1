@@ -310,7 +310,7 @@ thread_yield (void)
   if (cur != idle_thread)
   {
     //insert thread to ready list
-    list_insert_ordered(&ready_list, cur->elem, (list_less_func *) &cmp_priority, NULL);
+    list_insert_ordered(&ready_list, &cur->elem, (list_less_func *) &cmp_priority, NULL);
   } 
   cur->status = THREAD_READY;
   schedule ();
