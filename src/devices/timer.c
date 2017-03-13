@@ -87,17 +87,18 @@ timer_elapsed (int64_t then)
 }
 
 /* Sleeps for approximately TICKS timer ticks.  Interrupts must
-   be turned on. */
+   be turned on.  We rewrote the original function to eliminate 
+   busy waiting which the previous implementation was using.*/
 void
 timer_sleep (int64_t ticks) 
 {
 	struct thread *current_thread;
 	enum intr_level current_level;
-	ASSERT (intr_get_level() == INTER_ON);
+	ASSERT (intr_get_level() == INTR_ON);
 	current_level = intr_disable();
 	current_thread = thread_current();
-	current_thread-> = timer_ticks() + ticks;
-	list_insert_ordered(&sleeping_threads, &current_thread -> elem, ct, NULL);
+	current_thread->tick_to_wake_up = timer_ticks() + ticks;
+	list_insert_ordered(&sleeping_threads, &current_thread -> elem, compare_wake_ticks, NULL);
 	thread_block();
 	intr_set_level(current_level);
 } 
@@ -180,10 +181,10 @@ timer_interrupt (struct intr_frame *args UNUSED)
     struct thread *head_thread;
     ticks++;
     thread_tick();
-    while (!list_empty(&sleeping_threads) {
+    while (!list_empty(&sleeping_threads)) {
         head_of_list = list_front(&sleeping_threads);
 	head_thread = list_entry(head_of_list, struct thread, elem);
-	if(head_thread->t > ticks) {
+	if(head_thread->tick_to_wake_up > ticks) {
 	    break;
 	}
 	list_remove(head_of_list);

@@ -90,7 +90,6 @@ struct thread
     uint8_t *stack;                     /* Saved stack pointer. */
     int priority;                       /* Priority. */
     struct list_elem allelem;           /* List element for all threads list. */
-    int64_t t;   /*This will be the time to sleep in ticks. */
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
 
@@ -102,6 +101,9 @@ struct thread
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
     int default_priority;
+    
+   /*Tick to wake up on. */
+   int64_t tick_to_wake_up;
   };
 
 /* If false (default), use round-robin scheduler.
@@ -139,5 +141,7 @@ int thread_get_nice (void);
 void thread_set_nice (int);
 int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
-bool ct(const struct list_elem *first, const struct list_elem *second, void *aux);
+/* Method that returns true if the tick to wake up on in the first thread is less
+   than the second threads tick to wake up. */
+bool compare_wake_ticks(struct list_elem *first, struct list_elem *second, void *aux);
 #endif /* threads/thread.h */
