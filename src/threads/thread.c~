@@ -331,30 +331,11 @@ thread_foreach (thread_action_func *func, void *aux)
     }
 }
 
+/* Sets the current thread's priority to NEW_PRIORITY. */
 void
-thread_set_priority(int new_priority)
-{ 
-  struct thread *curr = thread_current();
-  bool forced = true;  
-  if (!curr->donated)
-    curr->priority = curr->default_priority = new_priority;
-  else if (forced)
-    {
-      if (curr->priority > new_priority)
-        curr->default_priority = new_priority;
-      else
-        curr->priority = new_priority;
-    }
-  else
-    curr->priority = new_priority;
-  
-  if (curr->status == THREAD_READY) 
-    {
-      list_remove (&curr->elem);
-      list_insert_ordered (&ready_list, &curr->elem, thread_insert_less_tail, NULL);
-    }
-  else if (curr->status == THREAD_RUNNING && list_entry (list_begin (&ready_list), struct thread, elem)->priority > new_priority)
-    thread_yield_head (curr);
+thread_set_priority (int new_priority) 
+{
+  thread_current ()->priority = new_priority;
 }
 
 /* Returns the current thread's priority. */
