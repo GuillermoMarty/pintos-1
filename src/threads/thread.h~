@@ -100,13 +100,10 @@ struct thread
 
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
-<<<<<<< HEAD
     int default_priority;
-=======
     
    /*Tick to wake up on. */
    int64_t tick_to_wake_up;
->>>>>>> c057460dface17a33ba4d019c52bd6ee60ebf30b
   };
 
 /* If false (default), use round-robin scheduler.
