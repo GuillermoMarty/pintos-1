@@ -54,6 +54,22 @@ cmp_priority (const struct list_elem *a, const struct list_elem *b,
   return a_thread->priority > b_thread->priority;
 }
 
+static bool
+cmp_semaphore_priority (const struct list_elem *a, const struct list_elem *b,
+               void *aux UNUSED)
+{
+  //check that a & b arent null
+  ASSERT (a != NULL);
+  ASSERT (b != NULL);
+
+  //grab thread
+  const struct semaphore_elem *a_semaphore = list_entry (a, struct thread, elem);
+  const struct semaphore_elem *b_semaphore = list_entry (b, struct thread, elem);
+
+  //return true if a has higher priority, false if b has higher priority
+  return a_thread->priority > b_thread->priority;
+}
+
 /* Initializes semaphore SEMA to VALUE.  A semaphore is a
    nonnegative integer along with two atomic operators for
    manipulating it:
@@ -291,6 +307,8 @@ struct semaphore_elem
   {
     struct list_elem elem;              /* List element. */
     struct semaphore semaphore;         /* This semaphore. */
+
+    int priority;
   };
 
 /* Initializes condition variable COND.  A condition variable
@@ -335,7 +353,13 @@ cond_wait (struct condition *cond, struct lock *lock)
   ASSERT (lock_held_by_current_thread (lock));
   
   sema_init (&waiter.semaphore, 0);
-  list_push_back (&cond->waiters, &waiter.elem);
+
+  //set sema priority
+  waiter.priority = thread_current()->priority;
+
+  //Sort cond->waiter to be descending order based on priority
+  list_insert_ordered (&cond->waiters, &waiter.elem, cmp_semaphore_priority, NULL);
+  
   lock_release (lock);
   sema_down (&waiter.semaphore);
   lock_acquire (lock);
