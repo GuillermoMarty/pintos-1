@@ -32,6 +32,28 @@
 #include "threads/interrupt.h"
 #include "threads/thread.h"
 
+static bool cmp_priority (const struct list_elem *a,
+                           const struct list_elem *b,
+                           void *aux UNUSED);
+
+
+
+static bool
+cmp_priority (const struct list_elem *a, const struct list_elem *b,
+               void *aux UNUSED)
+{
+  //check that a & b arent null
+  ASSERT (a != NULL);
+  ASSERT (b != NULL);
+
+  //grab thread
+  const struct thread *a_thread = list_entry (a, struct thread, elem);
+  const struct thread *b_thread = list_entry (b, struct thread, elem);
+
+  //return true if a has higher priority, false if b has higher priority
+  return a_thread->priority > b_thread->priority;
+}
+
 /* Initializes semaphore SEMA to VALUE.  A semaphore is a
    nonnegative integer along with two atomic operators for
    manipulating it:
