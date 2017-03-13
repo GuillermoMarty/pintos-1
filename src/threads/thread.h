@@ -98,6 +98,9 @@ struct thread
     uint32_t *pagedir;                  /* Page directory. */
 #endif
 
+    bool is_donated;
+    int old_level;
+
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
     
