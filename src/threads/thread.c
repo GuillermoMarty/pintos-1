@@ -339,7 +339,7 @@ void
 thread_set_priority (int new_priority) 
 {
   struct thread * current;
-  current = thread_current;
+  current = thread_current();
   
   //if the old level has no value set to current priority
   if(current->old_level == NULL)
