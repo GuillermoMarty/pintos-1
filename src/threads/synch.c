@@ -63,8 +63,8 @@ cmp_semaphore_priority (const struct list_elem *a, const struct list_elem *b,
   ASSERT (b != NULL);
 
   //grab thread
-  const struct semaphore_elem *a_semaphore = list_entry (a, struct thread, elem);
-  const struct semaphore_elem *b_semaphore = list_entry (b, struct thread, elem);
+  const struct semaphore_elem *a_semaphore = list_entry (a, struct semaphore_elem, elem);
+  const struct semaphore_elem *b_semaphore = list_entry (b, struct semaphore_elem, elem);
 
   //return true if a has higher priority, false if b has higher priority
   return a_semaphore->priority > b_semaphore->priority;
