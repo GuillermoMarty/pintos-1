@@ -146,5 +146,5 @@ int thread_get_load_avg (void);
 /* Method that returns true if the tick to wake up on in the first thread is less
    than the second threads tick to wake up. */
 bool compare_wake_ticks(struct list_elem *first, struct list_elem *second, void *aux);
-static boolcmp_priority (const struct list_elem *a, const struct list_elem *b, void *aux UNUSED);
+static bool cmp_priority (const struct list_elem *a, const struct list_elem *b, void *aux UNUSED);
 #endif /* threads/thread.h */
