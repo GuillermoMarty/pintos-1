@@ -32,9 +32,9 @@
 #include "threads/interrupt.h"
 #include "threads/thread.h"
 
-static bool cmp_priority (const struct list_elem *a,
-                           const struct list_elem *b,
-                           void *aux UNUSED);
+static bool cmp_priority (const struct list_elem *a, const struct list_elem *b, void *aux UNUSED);
+
+static bool cmp_semaphore_priority (const struct list_elem *a, const struct list_elem *b, void *aux UNUSED);
 
 
 
@@ -67,7 +67,7 @@ cmp_semaphore_priority (const struct list_elem *a, const struct list_elem *b,
   const struct semaphore_elem *b_semaphore = list_entry (b, struct thread, elem);
 
   //return true if a has higher priority, false if b has higher priority
-  return a_thread->priority > b_thread->priority;
+  return a_semaphore->priority > b_semaphore->priority;
 }
 
 /* Initializes semaphore SEMA to VALUE.  A semaphore is a
@@ -359,7 +359,7 @@ cond_wait (struct condition *cond, struct lock *lock)
 
   //Sort cond->waiter to be descending order based on priority
   list_insert_ordered (&cond->waiters, &waiter.elem, cmp_semaphore_priority, NULL);
-  
+
   lock_release (lock);
   sema_down (&waiter.semaphore);
   lock_acquire (lock);
