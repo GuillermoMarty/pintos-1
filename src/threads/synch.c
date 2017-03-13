@@ -54,22 +54,6 @@ cmp_priority (const struct list_elem *a, const struct list_elem *b,
   return a_thread->priority > b_thread->priority;
 }
 
-static bool
-cmp_semaphore_priority (const struct list_elem *a, const struct list_elem *b,
-               void *aux UNUSED)
-{
-  //check that a & b arent null
-  ASSERT (a != NULL);
-  ASSERT (b != NULL);
-
-  //grab thread
-  const struct semaphore_elem *a_semaphore = list_entry (a, struct semaphore_elem, elem);
-  const struct semaphore_elem *b_semaphore = list_entry (b, struct semaphore_elem, elem);
-
-  //return true if a has higher priority, false if b has higher priority
-  return a_semaphore->priority > b_semaphore->priority;
-}
-
 /* Initializes semaphore SEMA to VALUE.  A semaphore is a
    nonnegative integer along with two atomic operators for
    manipulating it:
@@ -310,6 +294,22 @@ struct semaphore_elem
 
     int priority;
   };
+
+static bool
+cmp_semaphore_priority (const struct list_elem *a, const struct list_elem *b,
+               void *aux UNUSED)
+{
+  //check that a & b arent null
+  ASSERT (a != NULL);
+  ASSERT (b != NULL);
+
+  //grab thread
+  const struct semaphore_elem *a_semaphore = list_entry (a, struct semaphore_elem, elem);
+  const struct semaphore_elem *b_semaphore = list_entry (b, struct semaphore_elem, elem);
+
+  //return true if a has higher priority, false if b has higher priority
+  return a_semaphore->priority > b_semaphore->priority;
+}
 
 /* Initializes condition variable COND.  A condition variable
    allows one piece of code to signal a condition and cooperating
