@@ -152,11 +152,8 @@ sema_up (struct semaphore *sema)
 
   sema->value++;
 
-  //check that first_thread isnt null
-  ASSERT(first_thread != NULL);
-
-  //if the first_thread has higher priority, yield current thread
-  if(first_thread->priority > current->priority)
+  //if the first_thread is not null AND has higher priority, yield current thread
+  if(first_thread != NULL && first_thread->priority > current->priority)
   {
     thread_yield();
   }
