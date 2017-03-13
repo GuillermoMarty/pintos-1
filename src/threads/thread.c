@@ -307,8 +307,11 @@ thread_yield (void)
   ASSERT (!intr_context ());
 
   old_level = intr_disable ();
-  if (cur != idle_thread) 
-    list_push_back (&ready_list, &cur->elem);
+  if (cur != idle_thread)
+  {
+    //insert thread to ready list
+    list_insert_ordered(&ready_list, cur->elem, (list_less_func *) &cmp_priority, NULL);
+  } 
   cur->status = THREAD_READY;
   schedule ();
   intr_set_level (old_level);
@@ -601,4 +604,20 @@ bool compare_wake_ticks(struct list_elem *first, struct list_elem *second, void 
    struct thread *firstThread = list_entry(first, struct thread, elem);
    struct thread *secondThread = list_entry(second, struct thread, elem);
    return firstThread->tick_to_wake_up < secondThread -> tick_to_wake_up;
+}
+
+static bool
+cmp_priority (const struct list_elem *a, const struct list_elem *b,
+               void *aux UNUSED)
+{
+  //check that a & b arent null
+  ASSERT (a != NULL);
+  ASSERT (b != NULL);
+
+  //grab thread
+  const struct thread *a_thread = list_entry (a, struct thread, elem);
+  const struct thread *b_thread = list_entry (b, struct thread, elem);
+
+  //return true if a has higher priority, false if b has higher priority
+  return a_thread->priority > b_thread->priority;
 }
