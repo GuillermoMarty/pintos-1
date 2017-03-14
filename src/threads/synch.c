@@ -358,7 +358,7 @@ cond_wait (struct condition *cond, struct lock *lock)
   waiter.priority = thread_current()->priority;
 
   //Sort cond->waiter to be descending order based on priority
-  list_insert_ordered (&cond->waiters, &waiter.elem, cmp_semaphore_priority, NULL);
+  list_insert_ordered (&cond->waiters, &waiter.elem, (list_less_func *) &cmp_semaphore_priority, NULL);
 
   lock_release (lock);
   sema_down (&waiter.semaphore);
